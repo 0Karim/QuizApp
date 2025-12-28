@@ -33,6 +33,7 @@ export default function Quiz() {
       setAnswerState("answered");
 
       // After 1 second, check if answer is correct
+
       const currentQuestion = questions[currentQuestionIndex];
       const isCorrect = answer === currentQuestion.answers[0];
       setAnswerState(isCorrect ? "correct" : "wrong");
