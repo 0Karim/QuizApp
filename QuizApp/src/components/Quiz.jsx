@@ -4,66 +4,52 @@ import Question from "./Question.jsx";
 import Answer from "./Answer.jsx";
 import QuizTimer from "./QuizTimer.jsx";
 
-export default function Quiz(){
+export default function Quiz() {
     const { 
         questions,
         currentQuestionIndex,
         userAnswers,
         quizIsComplete,
         skipAnswer,
-        restartQuiz
-     } = useContext(QuizContext);
+        restartQuiz,
+        selectAnswer
+    } = useContext(QuizContext);
 
-    const [answerState, setAnswerState] = useState(''); // '', 'answered', 'correct', 'wrong'
+    const [answerState, setAnswerState] = useState('');
 
-    // console.log(questions);
-    // console.log('Current Question Index:', currentQuestionIndex);
-    // console.log('User Answers:', userAnswers);
-
-    // Handle timeout - skip to next question
+    // Handle timeout - skip to next question when timer runs out
     const handleSkipAnswer = useCallback(() => {
-        if(answerState === ''){
-            skipAnswer();
-            setAnswerState('');
-        }
-    }, [answerState, skipAnswer]);
+        skipAnswer();
+    }, [skipAnswer]);
 
-
+    // Handle answer selection
     const handleSelectAnswer = useCallback((answer) => {
         setAnswerState('answered');
         
         // After 1 second, check if answer is correct
         setTimeout(() => {
-        const currentQuestion = questions[currentQuestionIndex];
-        const isCorrect = answer === currentQuestion.answers[0];
-        setAnswerState(isCorrect ? 'correct' : 'wrong');
-        
-        // After showing result for 2 seconds, move to next question
-        setTimeout(() => {
-            setAnswerState('');
-        }, 2000);
+            const currentQuestion = questions[currentQuestionIndex];
+            const isCorrect = answer === currentQuestion.answers[0];
+            setAnswerState(isCorrect ? 'correct' : 'wrong');
+            
+            // After showing result for 2 seconds, move to next question
+            setTimeout(() => {
+                selectAnswer(answer);
+                setAnswerState(''); // Reset for next question
+            }, 2000);
         }, 1000);
-    }, [questions, currentQuestionIndex]);    
-
-    // When answer is selected, update answer state
-    // const handleAnswerSelected = useCallback((state) => {
-    //     setAnswerState(state);
-    // }, []);
-
-    // Reset answer state when moving to next question
-    const handleNextQuestion = useCallback(() => {
-        setAnswerState('');
-    }, []);    
+    }, [questions, currentQuestionIndex, selectAnswer]);
 
     if (quizIsComplete) {
-
-        const correctAnswers = userAnswers.filter((answer,index) => answer === questions[index].answers[0]).length;
+        const correctAnswers = userAnswers.filter((answer, index) => 
+            answer === questions[index].answers[0]
+        ).length;
         const skippedAnswers = userAnswers.filter(a => a === null).length;
+        const wrongAnswers = userAnswers.length - correctAnswers - skippedAnswers;
 
-        return(
+        return (
             <div id="quiz">
                 <div id="summary">
-                    <img src="/quiz-complete.png" alt="Quiz completed" />
                     <h2>Quiz Completed! 🎉</h2>
                     <div id="summary-stats">
                         <p>
@@ -71,80 +57,38 @@ export default function Quiz(){
                             <span className="text">Correct Answers</span>                            
                         </p>
                         <p>
-                            <span className="number">{userAnswers.length - correctAnswers - skippedAnswers}</span>
+                            <span className="number">{wrongAnswers}</span>
                             <span className="text">Wrong Answers</span>                            
                         </p>
                         <p>
                             <span className="number">{skippedAnswers}</span>
-                            <span className="text">Skipped Questions</span>
+                            <span className="text">Skipped</span>
                         </p>
                     </div>
                     <button onClick={restartQuiz}>Restart Quiz</button>                    
                 </div>
             </div>
         );
-
-        // return (
-        // <div id="quiz">
-        //     <div id="summary">
-        //     <h2>Quiz Completed! 🎉</h2>
-        //     <p>You answered {userAnswers.length} questions</p>
-        //     <p>
-        //         Correct: {userAnswers.filter((answer, index) => 
-        //         answer === questions[index].answers[0]
-        //         ).length}
-        //     </p>
-        //     <p>Skipped: {userAnswers.filter(a => a === null).length}</p>
-        //     <button onClick={restartQuiz}>Restart Quiz</button>
-        //     </div>
-        // </div>
-        // );
-    }
-    
-    // Different timeouts based on answer state
-    let timer = 10000; // 10 seconds to answer
-    if (answerState === 'answered') {
-        timer = 1000; // 1 second to show selected state
-    }
-    
-    if (answerState === 'correct' || answerState === 'wrong') {
-        timer = 2000; // 2 seconds to show result
     }
 
-
-    const currentQuestion = questions[currentQuestionIndex];
-    return(
+    return (
         <div id="quiz">
             <div id="question">
-
+                {/* Timer only restarts when question changes (currentQuestionIndex) */}
                 <QuizTimer 
-                    key={currentQuestionIndex + answerState}
-                    timeout={timer}
-                    onTimeout={answerState === '' ? handleSkipAnswer : handleNextQuestion}
+                    key={currentQuestionIndex}
+                    timeout={10000}
+                    onTimeout={handleSkipAnswer}
                     mode={answerState}
                 />
                 <Question />
                 <Answer 
-                    // onSelectAnswer={handleAnswerSelected}
                     onSelectAnswer={handleSelectAnswer}
                     answerState={answerState}
                 />
-
                 <p style={{ marginTop: '2rem', textAlign: 'center', color: '#888' }}>
                     Question {currentQuestionIndex + 1} of {questions.length}
-                </p>        
-
-
-
-                {/* Temporary test buttons */}
-                {/* <div style={{ marginTop: '2rem' }}>
-                <button onClick={() => selectAnswer('Test Answer')}>
-                    Select Answer (Test)
-                </button>
-                <button onClick={skipAnswer} style={{ marginLeft: '1rem' }}>
-                    Skip Question
-                </button>
-                </div> */}
+                </p>
             </div>
         </div>        
     );
