@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function QuizTimer({ timeout, onTimeout, mode }){
+export default function QuizTimer({ timeout, onTimeout, mode }) {
   const [remainingTime, setRemainingTime] = useState(timeout);
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -14,16 +14,16 @@ export default function QuizTimer({ timeout, onTimeout, mode }){
     // Update remaining time every 10ms for smooth animation    
     intervalRef.current = setInterval(() => {
         setRemainingTime(prevTime => prevTime - 10);
-    },10);
+    }, 10);
+    
     // Cleanup function - clear timers when component unmounts or dependencies change
     return () => {
       clearTimeout(timeoutRef.current);
       clearInterval(intervalRef.current);
     };
-  } , [timeout, onTimeout])
+  }, [timeout, onTimeout]);
 
-
-    return(
-        <progress id="question-time" max={timeout} value={remainingTime} className={mode} />
-    );
+  return (
+    <progress id="question-time" max={timeout} value={remainingTime} className={mode} />
+  );
 }
