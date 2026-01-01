@@ -4,10 +4,13 @@ import QuizContextProvider from "./context/QuizContext.jsx";
 
 function App() {
     return (
-    <QuizContextProvider>
-        <Header />
-        <Quiz />
-    </QuizContextProvider>
+        <>
+            <Header />
+            <main>
+                <Quiz />
+            </main>
+
+        </>
     );
 }
 

@@ -1,29 +1,33 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState} from "react";
 
-export default function QuizTimer({ timeout, onTimeout, mode }) {
-  const [remainingTime, setRemainingTime] = useState(timeout);
-  const intervalRef = useRef(null);
-  const timeoutRef = useRef(null);
+export default function QuizTimer({timeout, onTimeOut}) {
+    const [remainingTime, setRemainingTime] = useState(timeout);
 
-  useEffect(() => {
-    // Set timeout to call onTimeout when time runs out
-    timeoutRef.current = setTimeout(() => {
-        onTimeout();
-    }, timeout);
-    
-    // Update remaining time every 10ms for smooth animation    
-    intervalRef.current = setInterval(() => {
-        setRemainingTime(prevTime => prevTime - 10);
-    }, 10);
-    
-    // Cleanup function - clear timers when component unmounts or dependencies change
-    return () => {
-      clearTimeout(timeoutRef.current);
-      clearInterval(intervalRef.current);
-    };
-  }, [timeout, onTimeout]);
+    useEffect(() => {
+        console.log('Setting timeout');
+        //we should add effect here to avoid component re rendering and resetting the timeout
+        const timer = setTimeout(() => {
+            onTimeOut();
+        }, timeout);
 
-  return (
-    <progress id="question-time" max={timeout} value={remainingTime} className={mode} />
-  );
+        return () => {
+            clearTimeout(timer);
+        }
+    }, [timeout, onTimeOut]);
+
+    useEffect(() => {
+        console.log('Setting Interval');        
+        //we need use effect here to avoid multiple intervals being created on each render
+        const interval = setInterval(() => {
+            setRemainingTime(prevTime => prevTime - 100);
+        }, 100);
+
+        return () => {
+            return clearInterval(interval);
+        }
+    }, []);
+
+    return (
+        <progress id="question-time" max={timeout} value={remainingTime} />
+    );
 }
