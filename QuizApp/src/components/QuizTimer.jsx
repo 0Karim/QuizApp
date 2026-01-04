@@ -1,13 +1,13 @@
 import { useEffect, useState} from "react";
 
-export default function QuizTimer({timeout, onTimeOut}) {
+export default function QuizTimer({timeout, onTimeOut, mode}) {
     const [remainingTime, setRemainingTime] = useState(timeout);
 
     useEffect(() => {
         console.log('Setting timeout');
         //we should add effect here to avoid component re rendering and resetting the timeout
         const timer = setTimeout(() => {
-            onTimeOut();
+            onTimeOut;
         }, timeout);
 
         return () => {
@@ -28,6 +28,6 @@ export default function QuizTimer({timeout, onTimeOut}) {
     }, []);
 
     return (
-        <progress id="question-time" max={timeout} value={remainingTime} />
+        <progress id="question-time" max={timeout} value={remainingTime} className={mode}/>
     );
 }
